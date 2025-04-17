@@ -24,6 +24,8 @@ Specifies the main world of the DOM, which is the execution environment **shared
 
 > [!IMPORTANT]
 > These methods let you send a one-time **JSON-serializable message** from a **content script to the extension**, or from **the extension to a content script**.
+> El mensaje viaja: content-script → background → sidepanel.
+> El mensaje viaja: content-script ← background ← sidepanel.
 
 > [!TIP]
 > You **can't** use a promise and a callback in the same call.
