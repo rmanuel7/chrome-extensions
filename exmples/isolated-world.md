@@ -176,16 +176,74 @@ script.onload = () => script.remove(); // Limpieza opcional
 - `injected.js` es un archivo de tu extensión → no es inline → **evita el bloqueo por CSP**.
 - Al inyectarlo como un `<script src="...">`, se ejecuta **dentro del contexto de la página**, por lo tanto puede modificar `window.alert` de verdad.
 
+<br/>
+<br/>
+<br/>
+
 ---
 
-¿Querés que te arme el zip con esta estructura para cargar como "extensión desempaquetada"?
+> [!CAUTION]
+> Da este error:
+```
+content.js:4 
+ GET chrome-extension://invalid/ net::ERR_FAILED
+(anonymous)	@	content.js:4
+```
 
 
+¡Buen ojo! Ese error:
 
+```
+GET chrome-extension://invalid/ net::ERR_FAILED
+```
 
+usualmente pasa cuando intentás usar `chrome.runtime.getURL('injected.js')` **pero no has incluido `injected.js` en el `manifest.json`**. Aunque esté en tu carpeta, **si no está declarado**, Chrome no lo sirve.
 
+---
 
+### ✅ Solución
 
+Asegurate de incluir `injected.js` como parte de los archivos "web-accessible" en tu `manifest.json`.
+
+Actualizá tu `manifest.json` así:
+
+```json
+{
+  "manifest_version": 3,
+  "name": "Override alert",
+  "version": "1.0",
+  "description": "Reemplaza alert con console.log",
+  "permissions": [],
+  "host_permissions": ["<all_urls>"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["injected.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
+```
+
+---
+
+Con eso, `chrome.runtime.getURL('injected.js')` ya apunta a un recurso accesible públicamente desde la página.
+
+💡 **Resumen de pasos**:
+
+1. Verificá que `injected.js` está en la carpeta raíz o donde lo estás referenciando.
+2. Asegurate de que el `manifest.json` tenga `web_accessible_resources` correctamente.
+3. Recargá la extensión en `chrome://extensions` después de hacer cambios.
+
+---
+
+¿Querés que te prepare el proyecto completo listo para importar a Chrome?
 
 
 
